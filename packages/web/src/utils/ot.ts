@@ -188,13 +188,13 @@ export const getJsonOpFromSlate = (e: Editor, op: Operation): JSONOp => {
       const { selection } = e;
       const { anchor, focus } = selection || {};
 
-      // anchor &&
-      //   focus &&
-      //   e.submitLocalPresence?.({
-      //     anchor,
-      //     focus,
-      //     name: '写死的名字',
-      //   });
+      anchor &&
+        focus &&
+        e.submitLocalPresence?.({
+          anchor,
+          focus,
+          name: '写死的名字',
+        });
       return null;
     }
 

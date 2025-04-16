@@ -5,6 +5,8 @@ import HoveringToolbar from '@/components/HoveringToolbar';
 import withCollaboration from '@/plugins/withCollaboration';
 import { handleKeyDown } from '@/utils/handler';
 import { useCallback, useMemo, useState } from 'react';
+import useCursor from '@/hooks/useCursor';
+import withCursor from '@/plugins/withCursor';
 import { Descendant, createEditor } from 'slate';
 import {
   Editable,
@@ -29,7 +31,8 @@ export default function CollaborativeDoc() {
   }, []);
 
   // 文档装饰信息，会体现在文档的数据上，但是不会改变底层数据（不会产生 op 操作）
-  // const decorate = useCursor(editor);
+  const decorate = useCursor(withCursor(editor));
+  // console.log('decorate', decorate)
 
   // 拉取文档基本信息
   // const { loading: basicInfoLoading } = useRequest(
@@ -100,7 +103,7 @@ export default function CollaborativeDoc() {
             handleKeyDown(editor, event);
           }}
           placeholder="请输入正文"
-          // decorate={decorate}
+          decorate={decorate}
         />
       </Slate>
     </div>

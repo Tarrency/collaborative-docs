@@ -34,7 +34,7 @@ const useCursor = (e: Editor): Decorate => {
         userCursorMap.delete(id);
         setUserCursorMap(userCursorMap);
         return;
-      }
+      } 
       handlePresenceReceive(id, range);
     });
   }, []);
@@ -71,13 +71,43 @@ const useCursor = (e: Editor): Decorate => {
   const decorate = useCallback(
     ([node, path]: NodeEntry): Cursor[] => {
       const ranges: Cursor[] = [];
+      let refId = ''
 
       if (Text.isText(node) && userCursorMap.size) {
         userCursorMap.forEach((value) => {
           if (Range.includes(value, path)) {
-            ranges.push(value);
+            refId = value.id
+            const afterValue = {
+              ...value,
+              anchor: {
+                ...value.anchor,
+                offset: value.anchor.offset + 1
+              },
+              focus: {
+                ...value.focus,
+                offset: value.focus.offset + 1
+              },
+            }
+            ranges.push(afterValue);
           }
         });
+
+        if (refId && refId.length) {
+          const currentUserCursor:any = userCursorMap.get(refId);
+          userCursorMap.set(refId, {
+            ...currentUserCursor,
+            anchor: {
+              ...currentUserCursor.anchor,
+              offset: currentUserCursor.anchor.offset + 1
+            },
+            name: 'd',
+            focus: {
+              ...currentUserCursor.focus,
+              offset: currentUserCursor.focus.offset + 1
+    
+            },
+          });
+        }
       }
       return ranges;
     },

@@ -2,7 +2,7 @@
  * 处理光标在线状态。
  */
 import randomColor from 'randomcolor';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Text, Range, NodeEntry, Selection, Editor, Point } from 'slate';
 import { CustomRange } from '../plugins/withCursor';
 
@@ -23,6 +23,7 @@ const useCursor = (e: Editor): Decorate => {
   const [userCursorMap, setUserCursorMap] = useState<Map<string, Cursor>>(
     new Map(),
   );
+  const prevTextRef = useRef<string>('');
 
   useEffect(() => {
     // 监听 receive 方法，每次结束到有新的人选择时，处理光标信息
@@ -72,8 +73,11 @@ const useCursor = (e: Editor): Decorate => {
     ([node, path]: NodeEntry): Cursor[] => {
       const ranges: Cursor[] = [];
       let refId = ''
+      let diff = 0
 
       if (Text.isText(node) && userCursorMap.size) {
+        diff = prevTextRef.current.length ? node.text.length - prevTextRef.current.length : 0;
+        prevTextRef.current = node.text;
         userCursorMap.forEach((value) => {
           if (Range.includes(value, path)) {
             refId = value.id
@@ -81,11 +85,11 @@ const useCursor = (e: Editor): Decorate => {
               ...value,
               anchor: {
                 ...value.anchor,
-                offset: value.anchor.offset + 1
+                offset: value.anchor.offset + diff
               },
               focus: {
                 ...value.focus,
-                offset: value.focus.offset + 1
+                offset: value.focus.offset + diff
               },
             }
             ranges.push(afterValue);
@@ -98,18 +102,24 @@ const useCursor = (e: Editor): Decorate => {
             ...currentUserCursor,
             anchor: {
               ...currentUserCursor.anchor,
-              offset: currentUserCursor.anchor.offset + 1
+              offset: currentUserCursor.anchor.offset + diff
             },
             name: 'd',
             focus: {
               ...currentUserCursor.focus,
-              offset: currentUserCursor.focus.offset + 1
+              offset: currentUserCursor.focus.offset + diff
     
             },
           });
         }
       }
-      return ranges;
+
+      const lastRangeArr = []
+      if (ranges.length) {
+        const lastRange : any = ranges[ranges.length-1]
+        lastRangeArr.push(lastRange)
+      }
+      return lastRangeArr;
     },
     [userCursorMap],
   );

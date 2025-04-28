@@ -24,6 +24,7 @@ const useCursor = (e: Editor): Decorate => {
     new Map(),
   );
   const prevTextRef = useRef<string>('');
+  let [count, setCount] = useState(0)
 
   useEffect(() => {
     // 监听 receive 方法，每次结束到有新的人选择时，处理光标信息
@@ -36,6 +37,7 @@ const useCursor = (e: Editor): Decorate => {
         setUserCursorMap(userCursorMap);
         return;
       } 
+      setCount(count++)
       handlePresenceReceive(id, range);
     });
   }, []);
@@ -71,57 +73,40 @@ const useCursor = (e: Editor): Decorate => {
   // 文档的装饰信息，详情请查看 withReact 插件
   const decorate = useCallback(
     ([node, path]: NodeEntry): Cursor[] => {
-      const ranges: Cursor[] = [];
-      let refId = ''
-      let diff = 0
+      let ranges: Cursor[] = [];
 
       if (Text.isText(node) && userCursorMap.size) {
-        diff = prevTextRef.current.length ? node.text.length - prevTextRef.current.length : 0;
         prevTextRef.current = node.text;
         userCursorMap.forEach((value) => {
           if (Range.includes(value, path)) {
-            refId = value.id
-            const afterValue = {
-              ...value,
-              anchor: {
-                ...value.anchor,
-                offset: value.anchor.offset + diff
-              },
-              focus: {
-                ...value.focus,
-                offset: value.focus.offset + diff
-              },
-            }
-            ranges.push(afterValue);
+            ranges.push(value);
           }
         });
 
-        if (refId && refId.length) {
-          const currentUserCursor:any = userCursorMap.get(refId);
-          userCursorMap.set(refId, {
-            ...currentUserCursor,
-            anchor: {
-              ...currentUserCursor.anchor,
-              offset: currentUserCursor.anchor.offset + diff
-            },
-            name: 'd',
-            focus: {
-              ...currentUserCursor.focus,
-              offset: currentUserCursor.focus.offset + diff
-    
-            },
-          });
-        }
       }
+      console.log('ranges', ranges)
+      return ranges
 
-      const lastRangeArr = []
-      if (ranges.length) {
-        const lastRange : any = ranges[ranges.length-1]
-        lastRangeArr.push(lastRange)
-      }
-      return lastRangeArr;
+      // for(let [key, value] of userCursorMap) {
+      //   if (Range.includes(value, path)) {
+      //     console.log('include', path, value)
+      //     ranges.push(value);
+      //     return ranges
+      //     // continue
+      //   } else {
+      //     console.log('bu', path, value)
+      //     continue
+      //     // 怎么清空上一轮的decorate的value
+      //     // ranges.push(value);
+      //     // return ranges
+      //     // return []
+      //   }
+      // }
+      // console.log('ranges', ranges)
+      // return ranges
+
     },
-    [userCursorMap],
+    [count],
   );
 
   return decorate;

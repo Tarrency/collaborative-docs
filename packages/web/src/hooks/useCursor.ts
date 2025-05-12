@@ -23,7 +23,6 @@ const useCursor = (e: Editor): Decorate => {
   const [userCursorMap, setUserCursorMap] = useState<Map<string, Cursor>>(
     new Map(),
   );
-  const prevTextRef = useRef<string>('');
   let [count, setCount] = useState(0)
 
   useEffect(() => {
@@ -76,13 +75,19 @@ const useCursor = (e: Editor): Decorate => {
       let ranges: Cursor[] = [];
 
       if (Text.isText(node) && userCursorMap.size) {
-        prevTextRef.current = node.text;
         userCursorMap.forEach((value) => {
           if (Range.includes(value, path)) {
             ranges.push(value);
           }
         });
 
+      }
+      if (ranges.length){
+        const lastRange = []
+        const last = ranges[ranges.length - 1] || []
+        lastRange.push(last)
+        console.log('lastRange', lastRange)
+        return lastRange
       }
       console.log('ranges', ranges)
       return ranges

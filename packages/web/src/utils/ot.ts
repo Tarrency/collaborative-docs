@@ -37,6 +37,17 @@ export const getJsonOpFromSlate = (e: Editor, op: Operation): JSONOp => {
   switch (op.type) {
     case 'insert_text': {
       const { offset, path, text } = op;
+      const { selection } = e;
+      const { anchor, focus } = selection || {};
+      e.submitLocalPresence?.({
+        text,
+        name: '输入',
+        anchor,
+        focus,
+      });
+      
+
+      // const { offset, path, text } = op;
       return editOp(getJsonPathFromNode(path, 'text'), 'text-unicode', [
         offset,
         text,
@@ -45,6 +56,14 @@ export const getJsonOpFromSlate = (e: Editor, op: Operation): JSONOp => {
 
     case 'remove_text': {
       const { offset, path, text } = op;
+      // const { selection } = e;
+      // const { anchor, focus } = selection || {};
+      // e.submitLocalPresence?.({
+      //   text,
+      //   name: '删除',
+      //   anchor,
+      //   focus,
+      // });
       return editOp(getJsonPathFromNode(path, 'text'), 'text-unicode', [
         offset,
         { d: text.length },
@@ -184,19 +203,19 @@ export const getJsonOpFromSlate = (e: Editor, op: Operation): JSONOp => {
       return [insertNodeOp, deleteNodeOp].reduce(type.compose, null) as JSONOp;
     }
 
-    case 'set_selection': {
-      const { selection } = e;
-      const { anchor, focus } = selection || {};
+    // case 'set_selection': {
+    //   const { selection } = e;
+    //   const { anchor, focus } = selection || {};
 
-      anchor &&
-        focus &&
-        e.submitLocalPresence?.({
-          anchor,
-          focus,
-          name: '写死的名字',
-        });
-      return null;
-    }
+    //   anchor &&
+    //     focus &&
+    //     e.submitLocalPresence?.({
+    //       anchor,
+    //       focus,
+    //       name: '移动光标',
+    //     });
+    //   return null;
+    // }
 
     default:
       return null;

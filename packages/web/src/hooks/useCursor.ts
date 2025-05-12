@@ -76,13 +76,22 @@ const useCursor = (e: Editor): Decorate => {
 
       if (Text.isText(node) && userCursorMap.size) {
         userCursorMap.forEach((value) => {
-          if (Range.includes(value, path)) {
-            ranges.push(value);
-          }
+          // if (Range.includes(value, path)) {
+          //   ranges.push(value);
+          // }
+          if (Range.includes(value, path) && value.name == '输入') {
+            ranges.push({
+              ...value,
+              anchor: {
+                ...value.anchor,
+                offset: value.anchor.offset - value.text?.length
+              },
+            });
+          } 
         });
 
       }
-      if (ranges.length){
+      if (ranges.length) {
         const lastRange = []
         const last = ranges[ranges.length - 1] || []
         lastRange.push(last)
@@ -92,26 +101,8 @@ const useCursor = (e: Editor): Decorate => {
       console.log('ranges', ranges)
       return ranges
 
-      // for(let [key, value] of userCursorMap) {
-      //   if (Range.includes(value, path)) {
-      //     console.log('include', path, value)
-      //     ranges.push(value);
-      //     return ranges
-      //     // continue
-      //   } else {
-      //     console.log('bu', path, value)
-      //     continue
-      //     // 怎么清空上一轮的decorate的value
-      //     // ranges.push(value);
-      //     // return ranges
-      //     // return []
-      //   }
-      // }
-      // console.log('ranges', ranges)
-      // return ranges
-
     },
-    [count],
+    [userCursorMap, count],
   );
 
   return decorate;
